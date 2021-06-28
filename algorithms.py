@@ -185,5 +185,6 @@ def dealer_strategy(hand, playerhand, turn, difficulty='normal'):
                     return 'h'
             elif sum(hand) <= 8:
                 return 'h'
+            
     if difficulty == 'cheater': #TODO
         pass
