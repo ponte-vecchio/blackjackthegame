@@ -1,12 +1,19 @@
 import os
 import time
 import algorithms
+import rich
+from rich.console import Console;c=Console()
+from rich.text import Text
+from math import floor
 from tzlocal import get_localzone
 
 import random
 #random.seed(69420)
 
 # >>> init >>>
+c = Console()
+suit = ['♡', '♤', '♧', '♢']
+theme = rich.style.Style(color='red',bgcolor='white')
 deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] * 4
 #dealer_hand = []
 #player_hand = []
@@ -17,7 +24,7 @@ turn = 0
 bet = 0
 # <<< init <<<
 
-def get_local_currency():
+def get_local_currency():  # TODO
     #euro = ['Austria','Belgium','Cyprus','Estonia','Finland','France','Germany','Greece','Ireland','Italy','Latvia',                    'Lithuania','Luxembourg','Malta','Netherlands','Portugal','Spain','Slovenia','Slovakia']
     #pound = []
 
@@ -31,6 +38,8 @@ def get_local_currency():
 cur = get_local_currency()
 
 def rematch():
+    """Initialise new game
+    """
     global deck, dealer_hand, player_hand, prize_pool, turn, bet
     dealer_hand = []
     player_hand = []
@@ -41,70 +50,84 @@ def rematch():
     thegame()
 
 def wipe():
+    """Clear the terminal.
+    """
     if os.name == 'posix':
         os.system('clear')
     else:
-        os.system('CLS') # or whatever
+        os.system('CLS') # or whatever idc windows lol
         
 def logo():
+    """Print logo.
+    """
+    global c
     wipe()
-    print(' L')
+    c.print(' L')
     time.sleep(0.1)
     wipe()
-    print(' L E')
+    c.print(' L E')
     time.sleep(0.1)
     wipe()
-    print(' L E O')
+    c.print(' L E O')
     time.sleep(0.1)
     wipe()
-    print(' L E O \'')
+    c.print(' L E O \'')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S')
+    c.print(' L E O \' S')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S   B                ')
+    c.print(' L E O \' S   B                ')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S   B L              ')
+    c.print(' L E O \' S   B L              ')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S   B L A            ')
+    c.print(' L E O \' S   B L A            ')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S   B L A C          ')
+    c.print(' L E O \' S   B L A C          ')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S   B L A C K        ')
+    c.print(' L E O \' S   B L A C K        ')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S   B L A C K J      ')
+    c.print(' L E O \' S   B L A C K J      ')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S   B L A C K J A    ')
+    c.print(' L E O \' S   B L A C K J A    ')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S   B L A C K J A C  ')
+    c.print(' L E O \' S   B L A C K J A C  ')
     time.sleep(0.1)
     wipe()
-    print(' L E O \' S   B L A C K J A C K')
+    c.print(' L E O \' S   B L A C K J A C K')
     time.sleep(0.4)
     wipe()
     time.sleep(0.4)
-    print(' L E O \' S   B L A C K J A C K')
+    c.print(' L E O \' S   B L A C K J A C K')
     time.sleep(0.4)
     wipe()
     time.sleep(0.4)
-    print(' L E O \' S   B L A C K J A C K')
+    c.print(' L E O \' S   B L A C K J A C K')
     time.sleep(0.8)
     wipe()
     time.sleep(0.4)
 
 def prize_status():
+    """
+    Show prize pool and balance
+    """
     global user_balance, prize_pool, cur
-    print(f'Prize pool: {cur}{prize_pool}\nBalance: {cur}{user_balance}')
+    c.print(f'Prize pool: {cur}{prize_pool}\nBalance: {cur}{user_balance}')
 
 def betting(bet):
+    """
+    Betting function. Checks if bet amount is valid then adds to prize pool.
+
+    Args:
+        bet ([int]): bet amount
+    """
     wipe()
     global user_balance, d_balance, prize_pool, cur
     try:
@@ -115,15 +138,21 @@ def betting(bet):
             prize_pool += 2 * bet
             prize_status()
         else:
-            print('Invalid amount.')
+            c.print('Invalid amount.')
             time.sleep(2)
             betting(bet)
     except:
-        print('Invalid character inserted.')
+        c.print('Invalid character inserted.')
         time.sleep(2)
         betting(bet)
 
 def deal_init():
+    """
+    First round deal. Shuffles deck the pops a card, then for values > 10 convert them to face cards
+
+    Returns:
+        list: list containing a player's hand
+    """
     global deck
     hand = []
     for i in range(2):
@@ -141,6 +170,14 @@ def deal_init():
     return hand
 
 def hit_card(hand):
+    """Pops a single card from the deck then adds to a player's hand
+
+    Args:
+        hand (list): A player's hand
+
+    Returns:
+        hand: list containing a player's cards with a newly-added card
+    """
     global deck
     card = deck.pop()
     if card == 11: 
@@ -155,10 +192,19 @@ def hit_card(hand):
     return hand
 
 def double_card(hand, user_balance):
+    """Pops two cards from the deck and doubles the prize pool.
+
+    Args:
+        hand ([type]): [description]
+        user_balance ([type]): [description]
+
+    Returns:
+        list: list containing a player's cards with two newly-added cards
+    """
     global deck, prize_pool, bet, d_balance
     user_balance -= bet
     d_balance -= bet
-    prize_pool *= prize_pool
+    prize_pool *= 2
     for i in range(2):
         card = deck.pop()
         if card == 11: 
@@ -173,6 +219,15 @@ def double_card(hand, user_balance):
     return hand
 
 def total(hand):
+    """
+    Calculates the total sum of a player's hand.
+
+    Args:
+        hand (list): A list containing a player's cards
+
+    Returns:
+        int: sum of all the cards a player has.
+    """
     total = 0
     for card in hand:
         if type(card) is str:
@@ -188,6 +243,16 @@ def total(hand):
     return total
 
 def dealer_win(d_hand, p_hand):
+    """
+    Checks win condition for dealer. If dealer meets the win condition, returns True, and if player meets the win condition, returns False. If for some reason neither person meets the win condition, returns a 'Draw'.
+
+    Args:
+        d_hand (list): List containing dealer's hand
+        p_hand (list): List containing player's hand
+
+    Returns:
+        bool or str: Win condition for dealer
+    """
     sum_d_hand = total(d_hand)
     sum_p_hand = total(p_hand)
     
@@ -204,19 +269,108 @@ def dealer_win(d_hand, p_hand):
     elif sum_d_hand == sum_p_hand:
         return 'Draw'
 
+def print_cards(hand, suit, term_width=49):
+    """
+    Returns a f-string for every card from a player's hand. Looks pretty when printed. Scales with respect to the width of the terminal.
+
+    Args:
+        hand (list): List containing a player's hand
+        suit (list): List containing a set of suits
+        term_width (int, optional): Terminal width for scaling purpose. Defaults to 49.
+
+    Returns:
+        str: F-string containing the pretty card visuals
+    """
+    border = {'v_bar': '│',
+              'h_bar': '─',
+              'top_left': '┌',
+              'top_centre': '┬',
+              'top_right': '┐',
+              'mid_left': '├',
+              'mid_centre': '┼',
+              'mid_right': '┤',
+              'bot_left': '└',
+              'bot_centre': '┴',
+              'bot_right': '┘'
+              }
+    space = " "
+    n_cards = len(hand)
+    empty = ''
+    top = ''
+    mid_left = f''
+    mid_mid = f''
+    mid_right = f''
+    btm = f''
+    
+    assert len(hand) == len(suit), f'Lengths of hand({hand}) and suit({suit}) do not match.'
+
+    card_len = int(floor(term_width * 0.2))
+
+    if card_len < 7:
+        card_len = 7
+    elif card_len > 13:
+        card_len = 13
+    else:
+        if card_len % 2 == 0:
+            card_len -= 1
+    
+    len_side = int((card_len-1)/2)
+
+    for i in range(n_cards):
+        #c.print(f'{hand[i]}, {type(hand[i])}')
+        if hand[i] is str :
+                empty += f'{border["v_bar"]}{space * card_len}{border["v_bar"]}  '
+                top += f'{border["top_left"]}{border["h_bar"] * card_len}{border["top_right"]}  '
+                mid_left += f'{border["v_bar"]}{space}{str(hand[i])}{space * (card_len-2)}{border["v_bar"]}  '
+                mid_mid += f'{border["v_bar"]}{space*len_side}{Text(str(suit[i]), style = "blue")}{space*len_side}{border["v_bar"]}  '
+                mid_right += f'{border["v_bar"]}{space * (card_len-2)}{str(hand[i])}{space}{border["v_bar"]}  '
+                btm += f'{border["bot_left"]}{border["h_bar"] * card_len}{border["bot_right"]}  '
+        elif hand[i] == 10:
+                empty += f'{border["v_bar"]}{space * card_len}{border["v_bar"]}  '
+                top += f'{border["top_left"]}{border["h_bar"] * card_len}{border["top_right"]}  '
+                mid_left += f'{border["v_bar"]}{space}{str(hand[i])}{space * (card_len-3)}{border["v_bar"]}  '
+                mid_mid += f'{border["v_bar"]}{space*len_side}{Text(str(suit[i]), style = "blue")}{space*len_side}{border["v_bar"]}  '
+                mid_right += f'{border["v_bar"]}{space * (card_len-3)}{str(hand[i])}{space}{border["v_bar"]}  '
+                btm += f'{border["bot_left"]}{border["h_bar"] * card_len}{border["bot_right"]}  '
+        else:
+            empty += f'{border["v_bar"]}{space * card_len}{border["v_bar"]}  '
+            top += f'{border["top_left"]}{border["h_bar"] * card_len}{border["top_right"]}  '
+            mid_left += f'{border["v_bar"]}{space}{str(hand[i])}{space * (card_len-2)}{border["v_bar"]}  '
+            mid_mid += f'{border["v_bar"]}{space*len_side}{Text(str(suit[i]), style = "blue")}{space*len_side}{border["v_bar"]}  '
+            mid_right += f'{border["v_bar"]}{space * (card_len-2)}{str(hand[i])}{space}{border["v_bar"]}  '
+            btm += f'{border["bot_left"]}{border["h_bar"] * card_len}{border["bot_right"]}  '
+    if card_len < 9:
+        return top+'\n'+mid_left+'\n'+empty+'\n'+mid_mid+'\n'+empty+'\n'+mid_right+'\n'+btm
+    elif 9 <= card_len < 12:
+        return top+'\n'+mid_left+'\n'+empty+'\n'+empty+'\n'+mid_mid+'\n'+empty+'\n'+empty+'\n'+mid_right+'\n'+btm
+    elif card_len >= 12:
+        return top+'\n'+mid_left+'\n'+empty+'\n'+empty+'\n'+empty+'\n'+mid_mid+'\n'+empty+'\n'+empty+'\n'+empty+'\n'+mid_right+'\n'+btm
+
 def showhand(d_hand, p_hand):
-    print('Dealer\'s hand')
+    """
+    Prints the hands of the dealer & the player. The first card of the dealer is anonymised with a '?'.
+    Args:
+        d_hand (list): List containing dealer's hands
+        p_hand (list): List containing player's hands
+    """
+    global c, suit
+    c.print('Dealer\'s hand')
+    rand_suit = random.choices(suit, k=len(d_hand))
     new_dealer = d_hand.copy()
     new_dealer[0] = '?'
-    for card in new_dealer:
-        print(f'{card}')
+    show_dealer = print_cards(new_dealer, rand_suit, term_width=c.width)
+    c.print(show_dealer)
             
-    print('\nYour hand')
+    c.print('\nYour hand')
     new_player = p_hand.copy()
-    for card in new_player:
-        print(f'{card}')
+    rand_suit = random.choices(suit, k=len(p_hand))
+    show_player = print_cards(p_hand, rand_suit, term_width=c.width)
+    c.print(show_player)
 
 def thegame():
+    """
+    Leothelion's Blackjack Game
+    """
     global user_balance, turn, d_balance, game_online, player_hand, dealer_hand, bet
 
     while user_balance > 1:
@@ -234,20 +388,20 @@ def thegame():
             if selection == 'h':
                 hit_card(player_hand)
                 wipe()
-                print('You chose to hit')
+                c.print('You chose to hit')
                 prize_status()
                 showhand(dealer_hand, player_hand)
                 time.sleep(3)
             if selection == 'd':
                 double_card(player_hand, user_balance)
                 wipe()
-                print('You chose to double up')
+                c.print('You chose to double up')
                 prize_status()
                 showhand(dealer_hand, player_hand)
                 time.sleep(3)
             if selection == 's':
                 wipe()
-                print('You chose to stay')
+                c.print('You chose to stay')
                 player_fold = True
                 prize_status()
                 showhand(dealer_hand, player_hand)
@@ -255,77 +409,77 @@ def thegame():
                 
             
             # dealer action
-            print(dealer_hand)
+            c.print(dealer_hand)
             d_strat = algorithms.dealer_strategy(dealer_hand, player_hand, turn)
-            print(d_strat)
+            c.print(d_strat)
             if d_strat == 'h':
                 hit_card(dealer_hand)
-                print(dealer_hand)
+                c.print(dealer_hand)
                 wipe()
-                print('Dealer hits')
+                c.print('Dealer hits')
                 prize_status()
                 showhand(dealer_hand, player_hand)
                 time.sleep(2)
             if d_strat == 'd':
                 double_card(dealer_hand, d_balance)
                 wipe()
-                print('Dealer doubles')
+                c.print('Dealer doubles')
                 prize_status()
                 showhand(dealer_hand, player_hand)
                 time.sleep(2)
             if d_strat == 's':
                 wipe()
-                print('Dealer stays')
+                c.print('Dealer stays')
                 prize_status()
                 showhand(dealer_hand, player_hand)
                 dealer_fold = True
                 time.sleep(2)
             
             if total(dealer_hand) >= 21 or total(player_hand) >= 21:
-                print('Win condition met by excess')
+                c.print('Win condition met by excess')
                     
                 if dealer_win(dealer_hand, player_hand) == True:
-                    print('House wins')
+                    c.print('House wins')
                     time.sleep(5)
                     d_balance += prize_pool
                     if user_balance >= 1:
                         rematch()
                     else:
-                        print('GAME OVER')
+                        c.print('GAME OVER')
                         time.sleep(5)
                         break
                 
                 elif dealer_win(dealer_hand, player_hand) == False:
-                    print('You win')
+                    c.print('You win')
                     time.sleep(5)
                     user_balance += prize_pool
                     rematch()
                     
                 elif dealer_win(dealer_hand, player_hand) == 'Draw':
-                    print('Draw')
+                    c.print('Draw')
                     time.sleep(5)
                     user_balance += prize_pool / 2
                     d_balance =- prize_pool / 2
                     rematch()
             elif dealer_fold is True and player_fold is True:
-                print('Win condition met, both staying')
+                c.print('Win condition met, both staying')
                 time.sleep(1.5)
 
                 if dealer_win(dealer_hand, player_hand) == True:
-                    print('House wins')
+                    c.print('House wins')
                     d_balance += prize_pool
                     time.sleep(5)
                     if user_balance >= 1:
                         rematch()
                 
                 elif dealer_win(dealer_hand, player_hand) == False:
-                    print('You win')
+                    c.print('You win')
                     time.sleep(5)
                     user_balance += prize_pool
                     rematch()
                     
                 elif dealer_win(dealer_hand, player_hand) == 'Draw':
-                    print('Draw')
+                    c.print('Draw')
                     time.sleep(5)
                     user_balance += prize_pool / 2
                     d_balance += prize_pool / 2
@@ -343,22 +497,22 @@ def thegame():
                     showhand(dealer_hand, player_hand)
                     time.sleep(2)
                     if total(dealer_hand) >= 21 or total(player_hand) >= 21:
-                        print('Win condition met')
+                        c.print('Win condition met')
                     
                     if dealer_win(dealer_hand, player_hand) == True:
-                        print('House wins')
+                        c.print('House wins')
                         time.sleep(5)
                         if user_balance >= 1:
                             rematch()
                     
                     elif dealer_win(dealer_hand, player_hand) == False:
-                        print('You win')
+                        c.print('You win')
                         time.sleep(5)
                         user_balance += prize_pool
                         rematch()
                         
                     elif dealer_win(dealer_hand, player_hand) == 'Draw':
-                        print('Draw')
+                        c.print('Draw')
                         time.sleep(5)
                         user_balance += prize_pool
                         rematch()
@@ -369,22 +523,22 @@ def thegame():
                     showhand(dealer_hand, player_hand)
                     time.sleep(2)
                     if total(dealer_hand) >= 21 or total(player_hand) >= 21:
-                        print('Win condition met')
+                        c.print('Win condition met')
                     
                     if dealer_win(dealer_hand, player_hand) == True:
-                        print('House wins')
+                        c.print('House wins')
                         time.sleep(5)
                         if user_balance >= 1:
                             rematch()
                     
                     elif dealer_win(dealer_hand, player_hand) == False:
-                        print('You win')
+                        c.print('You win')
                         time.sleep(5)
                         user_balance += prize_pool
                         rematch()
                         
                     elif dealer_win(dealer_hand, player_hand) == 'Draw':
-                        print('Draw')
+                        c.print('Draw')
                         time.sleep(5)
                         user_balance += prize_pool
                         rematch()
@@ -392,68 +546,68 @@ def thegame():
             # dealer action
             if dealer_fold is False:
                 d_strat = algorithms.dealer_strategy(dealer_hand, player_hand, turn)
-                print(d_strat)
+                c.print(d_strat)
                 if d_strat == 'h':
                     hit_card(dealer_hand)
                     wipe()
-                    print('Dealer hits')
+                    c.print('Dealer hits')
                     prize_status()
                     showhand(dealer_hand, player_hand)
                     time.sleep(2)
                     if total(dealer_hand) >= 21 or total(player_hand) >= 21:
-                        print('Win condition met by excess')
+                        c.print('Win condition met by excess')
                     
                     if dealer_win(dealer_hand, player_hand) == True:
-                        print('House wins')
+                        c.print('House wins')
                         time.sleep(5)
                         d_balance += prize_pool
                         if user_balance >= 1:
                             rematch()
                         else:
-                            print('GAME OVER')
+                            c.print('GAME OVER')
                             time.sleep(5)
                             break
                     
                     elif dealer_win(dealer_hand, player_hand) == False:
-                        print('You win')
+                        c.print('You win')
                         time.sleep(5)
                         user_balance += prize_pool
                         rematch()
                         
                     elif dealer_win(dealer_hand, player_hand) == 'Draw':
-                        print('Draw')
+                        c.print('Draw')
                         time.sleep(5)
                         user_balance += prize_pool / 2
                         d_balance =- prize_pool / 2
                         rematch()
                 if d_strat == 's':
                     wipe()
-                    print('Dealer stands')
+                    c.print('Dealer stands')
                     prize_status()
                     showhand(dealer_hand, player_hand)
                     time.sleep(2)
                     if total(dealer_hand) >= 21 or total(player_hand) >= 21:
-                        print('Win condition met by excess')
+                        c.print('Win condition met by excess')
                     
                     if dealer_win(dealer_hand, player_hand) == True:
-                        print('House wins')
+                        c.print('House wins')
                         time.sleep(5)
                         d_balance += prize_pool
                         if user_balance >= 1:
                             rematch()
                         else:
-                            print('GAME OVER')
+                            c.print('GAME OVER')
                             time.sleep(5)
                             break
                     
                     elif dealer_win(dealer_hand, player_hand) == False:
-                        print('You win')
+                        c.print('You win')
                         time.sleep(5)
                         user_balance += prize_pool
                         rematch()
                         
                     elif dealer_win(dealer_hand, player_hand) == 'Draw':
-                        print('Draw')
+                        c.print('Draw')
                         time.sleep(5)
                         user_balance += prize_pool / 2
                         d_balance =- prize_pool / 2
@@ -462,24 +616,24 @@ def thegame():
 
             
             elif dealer_fold is True and player_fold is True:
-                print('Win condition met, both staying')
+                c.print('Win condition met, both staying')
                 time.sleep(1.5)
 
                 if dealer_win(dealer_hand, player_hand) == True:
-                    print('House wins')
+                    c.print('House wins')
                     d_balance += prize_pool
                     time.sleep(5)
                     if user_balance >= 1:
                         rematch()
                 
                 elif dealer_win(dealer_hand, player_hand) == False:
-                    print('You win')
+                    c.print('You win')
                     time.sleep(5)
                     user_balance += prize_pool
                     rematch()
                     
                 elif dealer_win(dealer_hand, player_hand) == 'Draw':
-                    print('Draw')
+                    c.print('Draw')
                     time.sleep(5)
                     user_balance += prize_pool / 2
                     d_balance += prize_pool / 2
@@ -491,5 +645,5 @@ if __name__ == '__main__':
     cur = get_local_currency()
     game_online = True
     selection = None
-    logo()
+    c.print(logo(), style = theme)
     thegame()
