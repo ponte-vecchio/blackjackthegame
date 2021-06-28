@@ -1,2 +1,3 @@
-# blackjackthegame
-CLI based Blackjack written in python
+# Blackjack the Game
+
+TUI Blackjack written in Python
