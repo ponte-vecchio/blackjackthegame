@@ -1,16 +1,25 @@
 from blackjack import total
+from random import choice
 
 def dealer_strategy(hand, playerhand, turn, difficulty='normal'):
     if difficulty == 'easy':
-        if total(hand) < 7:
-            return 'd'
-        elif 7 <= total(hand) <= 11:
-            return 'd'
-        elif 12 <= total(hand) <= 15:
-            return 'h'
-        elif total(hand) < 15:
-            return 's'
-        
+        if turn == 1:
+            if total(hand) < 7:
+                return 'd'
+            elif 7 <= total(hand) <= 11:
+                return 'd'
+            elif 12 <= total(hand) <= 15:
+                return 'h'
+            elif total(hand) > 15:
+                return 's'
+        else:
+            if total(hand) <= 11:
+                return 'h'
+            elif 12 <= total(hand) <= 15:
+                return choice(['h', 's'])
+            elif total(hand) > 15:
+                return 's'
+ 
     if difficulty == 'normal':
         # soft
         if 'A' in hand:
@@ -78,7 +87,6 @@ def dealer_strategy(hand, playerhand, turn, difficulty='normal'):
         else:
             if 'J' in hand or 'Q' in hand or 'K' in hand:
                 newhand = [10 if x == 'J' or x == 'Q' or x == 'K' else x for x in hand]
-                print(newhand)
                 if sum(newhand) >= 17:
                     return 's'
                 elif 13 <= sum(newhand) <= 16:
@@ -135,7 +143,7 @@ def dealer_strategy(hand, playerhand, turn, difficulty='normal'):
             elif sum(hand) >= 17:
                 return 's'
             elif 13 <= sum(hand) <= 16:
-                hard_hit = [7, 8, 9, 10]
+                hard_hit = [6, 8, 9, 10]
                 d_switch = None
                 for i in hard_hit:
                     if i in playerhand:
